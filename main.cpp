@@ -28,5 +28,6 @@ int main(int narg, char **argv)
     process(requestList, db);
 
     cout << resetiosflags(ios::showbase) << setprecision(-1);
+	getchar();
     return 0;
 }
