@@ -35,6 +35,7 @@ class DSAException // This class handles exception
 };
 
 #pragma endregion
+
 #pragma region // This section defines Linked list
 template <class T>
 struct L1Item
@@ -59,30 +60,33 @@ class L1List
     }
     L1List(const L1List<T> &obj)
     { //Copy constructor
-        obj.
+        _pHead = NULL;
+        _size = 0;
+        obj.Traverse([](T &elm) {
+            this->InsertHead(elm);
+        });
+        this->Reverse;
     }
     ~L1List()
-    {
+    { //Destructor
+        while (_pHead)
+            RemoveHead();
     }
 
     bool IsEmpty()
-    {
+    { // Check if the list is empty
         return _pHead == NULL;
     }
 
     size_t Size()
-    {
+    { // Return the list's size
         return _size;
     }
 
-    void Clean() 
+    void Clean()
     {
-        while (_pHead) {
-            L1List<T> *tmp = _pHead->pNext;
-            delete _pHead;
-            _pHead = tmp;
-        }
-        _size = 0;
+        while (_pHead)
+            RemoveHead();
     }
     bool InsertHead(T &value)
     { // Insert a value to the head of the list
@@ -102,33 +106,37 @@ class L1List
         }
     }
 
-    bool RemoveHead() 
+    bool RemoveHead()
     { // Remove the first element of the list
-        if (IsEmpty()) return false;
-        L1Item<T>  tmp = _pHead->pNext;
+        if (IsEmpty())
+            return false;
+        L1Item<T> tmp = _pHead->pNext;
         delete _pHead;
         _pHead = tmp;
     }
 
     bool Reverse()
     { // Reverse the list
-        if (IsEmpty()) return true;
+        if (IsEmpty())
+            return true;
 
         size_t tmpSize = _size;
 
         L1Item<T> *tmp = _pHead;
         L1Item<T> *p = _pHead;
-        while (p)  
+        while (p)
         {
             InsertHead(p->data);
             p = p->pNext;
         }
 
         p = _pHead;
-        while (p->pNext != tmp) p = p->pNext;
+        while (p->pNext != tmp)
+            p = p->pNext;
         p->pNext = NULL;
 
-        while (tmp) {
+        while (tmp)
+        {
             p = tmp->pNext;
             delete tmp;
             tmp = p;
@@ -138,44 +146,54 @@ class L1List
         return true;
     }
 
-    void Traverse(void(*op)(T&)) 
+    void Traverse(void (*op)(T &))
     { // Traverse the list with void op
         L1Item<T> *p = _pHead;
-        while (p) 
+        while (p)
         {
             op(p->data);
             p = p->pNext;
         }
     }
 
-
+    T &operator[](int &index)
+    { // Return the object at index
+        L1Item<T> *p = _pHead;
+        for (int i = 0; i < index; i++)
+        {
+            p = p->pNext;
+        }
+        return p->data;
+    }
 };
 
 #pragma endregion
 #pragma region // This section defines AVL Tree
 
-template<class T> typedef struct AVLNode{
+template <class T>
+typedef struct AVLNode
+{
     T data;
 
-    AVLNode Father,LChild,RChild;
-    int Height,Weight;
+    AVLNode Father, LChild, RChild;
+    int Height, Weight;
 
-    AVLNode() {
+    AVLNode()
+    {
         Father = NULL;
         LChild = NULL;
         RChild = NULL;
-        height = 0;
-        weight = 0;
+        Height = 0;
+        Weight = 0;
     }
 
-    AVLNode(T &value): AVLNode(),data(value){}
-    
+    AVLNode(T &value) : AVLNode(), data(value) {}
 };
 
-template class<T> class AVLTree 
+template <class T>
+class AVLTree
 {
     AVLNode<T> *_pRoot;
-    
 }
 #pragma endregion
 #endif
