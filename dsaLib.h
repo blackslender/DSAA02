@@ -58,7 +58,8 @@ class L1List
         _size = 0;
     }
     L1List(const L1List<T> &obj)
-    { 
+    { //Copy constructor
+        obj.
     }
     ~L1List()
     {
