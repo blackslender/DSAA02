@@ -44,13 +44,146 @@ struct VM_Record {
     VM_Record(VM_Record& bus) : timestamp(bus.timestamp), longitude(bus.longitude), latitude(bus.latitude) {
         strcpy(id, bus.id);
     }
+
+	bool operator<(VM_Record &obj) { return timestamp < obj.timestamp; }
+	bool operator<=(VM_Record &obj) { return timestamp <= obj.timestamp; }
+	bool operator>(VM_Record &obj) { return timestamp > obj.timestamp; }
+	bool operator>=(VM_Record &obj) { return timestamp >= obj.timestamp; }
+	bool operator==(VM_Record &obj) { return timestamp == obj.timestamp; }
+
+	void operator=(VM_Record &obj) { strcpy(id, obj.id); timestamp = obj.timestamp; longitude = obj.longitude; latitude = obj.latitude; }
 };
+struct Timehms {
+public:
+	int hour = 0, min = 0, sec = 0;
+
+	bool operator>(time_t &obj) {
+		tm *cvTime = localtime(&obj);
+		return (hour * 3600 + min * 60 + sec > cvTime->tm_hour * 3600 + cvTime->tm_min * 60 + cvTime->tm_sec);
+	};
+	bool operator<(time_t &obj) {
+		tm *cvTime = localtime(&obj);
+		return (hour * 3600 + min * 60 + sec < cvTime->tm_hour * 3600 + cvTime->tm_min * 60 + cvTime->tm_sec);
+	}
+	bool operator>=(time_t &obj) {
+		tm *cvTime = localtime(&obj);
+		return (hour * 3600 + min * 60 + sec >= cvTime->tm_hour * 3600 + cvTime->tm_min * 60 + cvTime->tm_sec);
+	};
+	bool operator<=(time_t &obj) {
+		tm *cvTime = localtime(&obj);
+		return (hour * 3600 + min * 60 + sec <= cvTime->tm_hour * 3600 + cvTime->tm_min * 60 + cvTime->tm_sec);
+	}
+	bool operator==(time_t &obj) {
+		tm *cvTime = localtime(&obj);
+		return (hour * 3600 + min * 60 + sec == cvTime->tm_hour * 3600 + cvTime->tm_min * 60 + cvTime->tm_sec);
+	}
+
+	bool Valid() {
+		if (hour < 0 || hour > 23) return false;
+		if (min < 0 || min > 59) return false;
+		if (sec < 0 || sec > 59) return false;
+		return true;
+	}
+
+};
+
+class Vehicle{
+public:
+	char ID[10];
+	AVLTree<VM_Record> *data;
+
+	Vehicle() {
+		strcpy(ID, "");
+		data = new AVLTree<VM_Record>();
+	}
+	Vehicle(char* id) {
+		strcpy(ID, id);
+		data = new AVLTree<VM_Record>();
+	}
+	Vehicle(Vehicle& obj) {
+		strcpy(ID, obj.ID);
+		data = obj.data;
+	}
+	//The avltree wont be delete
+	~Vehicle() {
+		//delete data;
+	}
+
+	bool operator<(Vehicle &obj) { return strcmp(ID, obj.ID) < 0; }
+	bool operator<=(Vehicle &obj) { return strcmp(ID, obj.ID) <= 0; }
+	bool operator>(Vehicle &obj) { return strcmp(ID, obj.ID) > 0; }
+	bool operator>=(Vehicle &obj) { return strcmp(ID, obj.ID) >= 0; }
+	bool operator==(Vehicle &obj) { return strcmp(ID, obj.ID) == 0; }
+
+	//In assign operator, only the address of the tree is assign
+	void operator=(Vehicle &obj) {
+		strcpy(ID, obj.ID);
+		data = obj.data;
+	}
+
+
+	bool operator<(char* obj) { return strcmp(ID, obj) < 0; }
+	bool operator<=(char* obj) { return strcmp(ID, obj) <= 0; }
+	bool operator>(char* obj) { return strcmp(ID, obj) > 0; }
+	bool operator>=(char* obj) { return strcmp(ID, obj) >= 0; }
+	bool operator==(char* obj) { return strcmp(ID, obj) == 0; }
+
+	//Insert a VM_Record to the vehicle's database
+	void Insert(VM_Record &obj) {
+		data->Insert(obj);
+	}
+
+	//Look for the record which has exactly timestamp
+	VM_Record* Find(Timehms& obj) {
+		if (data->IsEmpty()) return NULL;
+		tm *tmptm = localtime(&data->Root()->timestamp);
+		tmptm->tm_hour = obj.hour;
+		tmptm->tm_min = obj.min;
+		tmptm->tm_sec = obj.sec;
+		VM_Record tmpRec;
+		tmpRec.timestamp = mktime(tmptm);
+		VM_Record* res = data->Find(tmpRec);
+		return res;
+	}
+
+	void TraverseLNR(void(*op)(VM_Record&)) {
+		data->TraverseLNR(op);
+	}
+	void TraverseLRN(void(*op)(VM_Record&)) {
+		data->TraverseLRN(op);
+	}
+	void TraverseNLR(void(*op)(VM_Record&)) {
+		data->TraverseNLR(op);
+	}
+
+	void TraverseLNR(void(*op)(VM_Record&,void*),void* param) {
+		data->TraverseLNR(op,param);
+	}
+	void TraverseLRN(void(*op)(VM_Record&, void*), void* param) {
+		data->TraverseLRN(op,param);
+	}
+	void TraverseNLR(void(*op)(VM_Record&, void*), void* param) {
+		data->TraverseNLR(op,param);
+	}
+};
+
+class DbTree :public AVLTree<Vehicle> {
+public:
+	Vehicle* Find(char* obj) {
+		Vehicle tmp; strcpy(tmp.ID, obj);
+		AVLTree<Vehicle> *base = this;
+		Vehicle* res = base->Find(tmp);
+		return res;
+	}
+};
+
 
 void    printVMRecord(VM_Record &);
 void    strPrintTime(char* des, time_t& t);
 bool    parseVMRecord(char*, VM_Record &);
 void    loadVMDB(char*, L1List<VM_Record> &);
 double  distanceEarth(double lat1d, double lon1d, double lat2d, double lon2d);
+double	distanceRecord(VM_Record &r1, VM_Record &r2);
 
 bool processRequest(VM_Request &, L1List<VM_Record> &, void *);// from processData.cpp
 

@@ -12,6 +12,8 @@
 #ifndef DSA171A2_REQUESTLIB_H
 #define DSA171A2_REQUESTLIB_H
 
+#pragma warning(disable:4996)
+#pragma warning(disable:4091)
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -24,7 +26,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
-#define REQUEST_CODE_SIZE     16
+#define REQUEST_CODE_SIZE     64
 #define MAX_PARAM_SIZE         6
 using namespace std;
 

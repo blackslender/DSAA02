@@ -4,6 +4,7 @@
 #include "requestLib.h"
 #include "dbLib.h"
 
+//#pragma warning(disable:4996)
 using namespace std;
 
 
@@ -15,6 +16,7 @@ void display(L1List<VM_Record>& bList) {
 }
 
 int main(int narg, char** argv) {
+
     L1List<VM_Request>  requestList;
     L1List<VM_Record>   db;
 
@@ -26,6 +28,6 @@ int main(int narg, char** argv) {
     process(requestList, db);
 
     cout << resetiosflags(ios::showbase) << setprecision(-1);
-
+	system("pause");
     return 0;
 }

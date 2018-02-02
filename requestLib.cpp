@@ -13,9 +13,22 @@
 
 
 void loadRequests(char* fName, L1List<VM_Request> &rList) {
-    ifstream sinput(fName);
-    while (sinput) {
-        VM_Request tmp; //Dummy request
-        sinput>>tmp.code;
-    }
+	ifstream inputStream(fName);
+	if (inputStream) {
+		while (!inputStream.eof()) {
+			bool isEof = false;
+			string tmp;
+			inputStream >> tmp;
+			if (tmp == "") break;
+			while (tmp.length() > 0 && tmp.back() == ';') {
+				isEof = true;
+				tmp.pop_back();
+			}
+			VM_Request *tmpR = new VM_Request(tmp);
+			rList.insertHead(*tmpR);
+		}
+	}
+	else cout << "The file is not found!";
+	rList.reverse();
+   
 }

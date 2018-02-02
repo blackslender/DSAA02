@@ -23,10 +23,10 @@
 using namespace std;
 
 void    strPrintTime(char* des, time_t& t) {
-    tm *pTime = gmtime(&t);
+    tm *pTime = localtime(&t);
     strftime(des, 26, "%Y-%m-%d %H:%M:%S", pTime);
 }
-
+L1List<VM_Record> *dbList;
 void loadVMDB(char* fName, L1List<VM_Record> &db) {
     ifstream inFile(fName);
 
@@ -54,10 +54,38 @@ void loadVMDB(char* fName, L1List<VM_Record> &db) {
     else {
         cout << "The file is not found!";
     }
+	dbList = &db;
 }
 
 bool parseVMRecord(char *pBuf, VM_Record &bInfo) {
-    // TODO: write code to parse a record from given line
+    // 1526,12/05/2016 00:41:04,01,-122.41204,37.79473,0.833,294.0,,0
+
+	stringstream ss; string tmp;
+	bool valid = true;
+	ss << pBuf;
+	
+	valid = valid && getline(ss, tmp, ','); //REV
+
+	valid = valid && getline(ss, tmp, ','); //Date & time
+	tm time;
+	sscanf(tmp.c_str(), "%d/%d/%d %d:%d:%d", &time.tm_mon, &time.tm_mday, &time.tm_year, &time.tm_hour, &time.tm_min, &time.tm_sec);
+	time.tm_mon--;
+	time.tm_year -= 1900;
+	bInfo.timestamp = mktime(&time);
+
+	valid = valid && getline(ss, tmp, ',');//ID
+	while (tmp.length() < 4) tmp = "0" + tmp;
+	strcpy(bInfo.id, tmp.c_str());
+
+	valid = valid && getline(ss, tmp , ',');//Longitude
+	bInfo.longitude = stod(tmp.c_str());
+
+	valid = valid && getline(ss, tmp, ',');//Latitude
+	bInfo.latitude = stod(tmp.c_str());
+
+	//Check if the record is valid
+
+	return valid;
 }
 
 void process(L1List<VM_Request>& requestList, L1List<VM_Record>& rList) {
@@ -105,4 +133,7 @@ double distanceEarth(double lat1d, double lon1d, double lat2d, double lon2d) {
     u = sin((lat2r - lat1r)/2);
     v = sin((lon2r - lon1r)/2);
     return 2.0 * earthRadiusKm * asin(sqrt(u * u + cos(lat1r) * cos(lat2r) * v * v));
+}
+double distanceRecord(VM_Record &r1, VM_Record &r2) {
+	return distanceEarth(r1.latitude, r1.longitude, r2.latitude, r2.longitude);
 }
