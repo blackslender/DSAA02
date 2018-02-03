@@ -16,7 +16,7 @@ void display(L1List<VM_Record> &bList)
 
 int main(int narg, char **argv)
 {
-
+	clock_t timer0 = clock();
     L1List<VM_Request> requestList;
     L1List<VM_Record> db;
 
@@ -24,9 +24,13 @@ int main(int narg, char **argv)
     loadVMDB(argv[2], db);
 
     cout << fixed << setprecision(12); // preset for floating point numbers
-
+	clock_t timer1 = clock();
+	cout << "Load data: " << double(timer1 - timer0) / CLOCKS_PER_SEC << endl;
     process(requestList, db);
-
+	clock_t timer2 = clock();
+	cout << "Load data: " << double(timer2 - timer1) / CLOCKS_PER_SEC << endl;
     cout << resetiosflags(ios::showbase) << setprecision(-1);
+	
+	getchar();
     return 0;
 }

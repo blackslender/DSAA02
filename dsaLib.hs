@@ -23,7 +23,7 @@ class DSAException
 	int _error;
 	string _text;
 
-  public:
+public:
 	DSAException() : _error(0), _text("Success") {}
 	DSAException(int err) : _error(err), _text("Unknown Error") {}
 	DSAException(int err, const char *text) : _error(err), _text(text) {}
@@ -47,8 +47,8 @@ class L1List
 	L1Item<T> *pHead = NULL;
 	size_t size = 0;
 
-  public:
-	L1List(){};
+public:
+	L1List() {};
 	~L1List()
 	{
 		while (pHead)
@@ -100,7 +100,7 @@ class L1List
 		size = tmp->Size();
 	}
 
-	void traverse(void (*op)(T &))
+	void traverse(void(*op)(T &))
 	{
 		for (L1Item<T> *p = pHead; p != NULL; p = p->pNext)
 		{
@@ -167,7 +167,7 @@ class AVLTree
 {
 	AVLNode<T> *pRoot;
 
-  public:
+public:
 	AVLTree() : pRoot(NULL) {}
 	~AVLTree() { Destroy(pRoot); }
 
@@ -198,20 +198,20 @@ class AVLTree
 	bool Remove(T &key) { return Remove(pRoot, key); }
 
 	//Traverse the tree NLR
-	void TraverseNLR(void (*op)(T &)) { TraverseNLR(op, pRoot); }
+	void TraverseNLR(void(*op)(T &)) { TraverseNLR(op, pRoot); }
 	//Traverse the tree LNR
-	void TraverseLNR(void (*op)(T &)) { TraverseLNR(op, pRoot); }
+	void TraverseLNR(void(*op)(T &)) { TraverseLNR(op, pRoot); }
 	//Traverse the tree LRN
-	void TraverseLRN(void (*op)(T &)) { TraverseLRN(op, pRoot); }
+	void TraverseLRN(void(*op)(T &)) { TraverseLRN(op, pRoot); }
 
 	//Traverse the tree NLR
-	void TraverseNLR(void (*op)(T &, void *), void *param) { TraverseNLR(op, param, pRoot); }
+	void TraverseNLR(void(*op)(T &, void *), void *param) { TraverseNLR(op, param, pRoot); }
 	//Traverse the tree LNR
-	void TraverseLNR(void (*op)(T &, void *), void *param) { TraverseLNR(op, param, pRoot); }
+	void TraverseLNR(void(*op)(T &, void *), void *param) { TraverseLNR(op, param, pRoot); }
 	//Traverse the tree LRN
-	void TraverseLRN(void (*op)(T &, void *), void *param) { TraverseLRN(op, param, pRoot); }
+	void TraverseLRN(void(*op)(T &, void *), void *param) { TraverseLRN(op, param, pRoot); }
 
-  protected:
+protected:
 	//Return the rightmost node of the tree at root
 	AVLNode<T> *RightMost(AVLNode<T> *root)
 	{
@@ -248,8 +248,8 @@ class AVLTree
 		}
 		/*
 		if (node->Father) {
-			Update(node->Father);
-			BalanceUp(node->Father);
+		Update(node->Father);
+		BalanceUp(node->Father);
 		}
 		*/
 		delete node;
@@ -531,7 +531,7 @@ class AVLTree
 	};
 
 	//Traverse the tree in LNR order with function void op
-	void TraverseLNR(void (*op)(T &), AVLNode<T> *node)
+	void TraverseLNR(void(*op)(T &), AVLNode<T> *node)
 	{
 		if (node == NULL)
 			return;
@@ -542,7 +542,7 @@ class AVLTree
 			TraverseLNR(op, node->RChild);
 	};
 	//Traverse the tree in NLR order with function void op
-	void TraverseNLR(void (*op)(T &), AVLNode<T> *node)
+	void TraverseNLR(void(*op)(T &), AVLNode<T> *node)
 	{
 		if (node == NULL)
 			return;
@@ -553,7 +553,7 @@ class AVLTree
 			TraverseNLR(op, node->RChild);
 	};
 	//Traverse the tree in LRN order with function void op
-	void TraverseLRN(void (*op)(T &), AVLNode<T> *node)
+	void TraverseLRN(void(*op)(T &), AVLNode<T> *node)
 	{
 		if (node == NULL)
 			return;
@@ -565,7 +565,7 @@ class AVLTree
 	};
 
 	//Traverse the tree in LNR order with function void op
-	void TraverseLNR(void (*op)(T &, void *), void *param, AVLNode<T> *node)
+	void TraverseLNR(void(*op)(T &, void *), void *param, AVLNode<T> *node)
 	{
 		if (node == NULL)
 			return;
@@ -576,7 +576,7 @@ class AVLTree
 			TraverseLNR(op, node->RChild);
 	};
 	//Traverse the tree in NLR order with function void op
-	void TraverseNLR(void (*op)(T &, void *), void *param, AVLNode<T> *node)
+	void TraverseNLR(void(*op)(T &, void *), void *param, AVLNode<T> *node)
 	{
 		if (node == NULL)
 			return;
@@ -587,7 +587,7 @@ class AVLTree
 			TraverseNLR(op, param, node->RChild);
 	};
 	//Traverse the tree in LRN order with function void op
-	void TraverseLRN(void (*op)(T &, void *), void *param, AVLNode<T> *node)
+	void TraverseLRN(void(*op)(T &, void *), void *param, AVLNode<T> *node)
 	{
 		if (node == NULL)
 			return;
@@ -604,20 +604,11 @@ class AVLTree
 template <class T>
 class Heap
 {
-
 	vector<T> data;
 	//Comparison function
-	bool (*comp)(T &, T &);
-	void Swap(T& obj1, T& obj2) {
-		T obj = obj1;
-		obj1 = obj2;
-		obj2 = obj;
-	}
+	bool(*comp)(T &, T &);
 
-	T& GetMax(T& obj1, T& obj2) {
-		if (obj1 > obj2) return obj1;
-		return obj2;
-	}
+#pragma region Relative node
 	int FatherNode(int x)
 	{
 		return ((x + 1) / 2 - 1);
@@ -631,63 +622,22 @@ class Heap
 		return 2 * x + 2;
 	}
 
-	void PushUp(int index) {
-		if (index == 0) return;
-		if (!comp(data[FatherNode(index)], data[index])) {
-			Swap(data[FatherNode(index)], data[index]);
-			PushUp(FatherNode(index));
-		}
-	}
-
-	void PushDown(int index) {
-		if (LeftNode(index) >= Size()) return;
-		if (LeftNode(index) == Size() - 1) {
-			if (Comp(data[LeftNode(index)], data[index]))
-				swap(data[LeftNode(index)], data[index]);
-			return;
-		}
-		int x = LeftNode(index);
-		if (Comp(data[RightNode(index)], data[LeftNode(index)])) x = RightNode(index);
-		if (Comp(data[x], data[index])) {
-			Swap(data[x], data[index]);
-			PushDown(x);
-		}
-	}
-  public:
+public:
 #pragma region Constructor
-	  Heap() { //Default heap is maxheap
-		  comp = [](T& obj1, T& obj2) -> bool{
-			  return obj1 > obj2;
-		  };
-	  }
+	Heap() { //Default heap is maxheap
+		comp = [](T& obj1, T& obj2) -> bool {
+			return obj1 > obj2;
+		};
+	}
 
-	  Heap(bool&(*op)(T&, T&)) {
-		  comp = op;
-	  }
+	Heap(bool&(*op)(T&, T&)) {
+		comp = op;
+	}
 
-	  Heap(const Heap<T> &obj) { //Copy constructor
-		  data = obj.data;
-	  }
+	Heap(const Heap<T> &obj) { //Copy constructor
+		data = obj.data;
+	}
 #pragma endregion
-	  size_t Size() {
-		  return data.size();
-	  }
 
-	  void Insert(T& value) {
-		  data.push_back(value);
-		  PushUp(data.size() - 1);
-	  }
-
-	  T Pop() {
-		  T tmp = data[0];
-		  data[0] = data.back();
-		  data.pop_back();
-		  PushDown(0);
-		  return tmp;
-	  }
-
-	  T Top() {
-		  return data[0];
-	  }
 };
 #endif //A02_DSALIB_H
