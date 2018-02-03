@@ -12,8 +12,8 @@
 #ifndef DSA171A2_REQUESTLIB_H
 #define DSA171A2_REQUESTLIB_H
 
-#pragma warning(disable:4996)
-#pragma warning(disable:4091)
+#pragma warning(disable : 4996)
+#pragma warning(disable : 4091)
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -26,43 +26,51 @@
 #define _CRT_SECURE_NO_WARNINGS
 #endif
 
-#define REQUEST_CODE_SIZE     64
-#define MAX_PARAM_SIZE         6
+#define REQUEST_CODE_SIZE 64
+#define MAX_PARAM_SIZE 6
 using namespace std;
 
-struct VM_Request {
-    char        code[REQUEST_CODE_SIZE];
-    double      params[MAX_PARAM_SIZE];
+struct VM_Request
+{
+    char code[REQUEST_CODE_SIZE];
+    double params[MAX_PARAM_SIZE];
 
-    VM_Request() {
-        *code   = '0';// default event is "0"
+    VM_Request()
+    {
+        *code = '0'; // default event is "0"
         code[1] = 0;
     }
-    VM_Request(char* str) {
+    VM_Request(char *str)
+    {
         strncpy(code, str, REQUEST_CODE_SIZE - 1);
     }
-    VM_Request(string& str) {
+    VM_Request(string &str)
+    {
         strncpy(code, str.data(), REQUEST_CODE_SIZE - 1);
     }
-    VM_Request(VM_Request& a) { // copy constructor
+    VM_Request(VM_Request &a)
+    { // copy constructor
         memcpy(code, a.code, REQUEST_CODE_SIZE);
         memcpy(params, a.params, MAX_PARAM_SIZE * sizeof(double));
     }
 
-    VM_Request(VM_Request&& a) { // move constructor
+    VM_Request(VM_Request &&a)
+    { // move constructor
         int i = 0;
-        while(a.code[i]) {
+        while (a.code[i])
+        {
             code[i] = a.code[i];
             i++;
         }
         code[i] = 0;
     }
 
-    bool operator==(VM_Request &b) {
+    bool operator==(VM_Request &b)
+    {
         return strcmp(code, b.code) == 0;
     }
 };
 
-void loadRequests(char* fName, L1List<VM_Request> &);
+void loadRequests(char *fName, L1List<VM_Request> &);
 
 #endif //DSA171A2_REQUESTLIB_H

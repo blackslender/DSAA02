@@ -17,6 +17,7 @@
 //#pragma warning(disable:4715)
 using namespace std;
 #pragma endregion
+#pragma region //DSAException
 class DSAException
 {
 	int _error;
@@ -30,7 +31,7 @@ class DSAException
 	int getError() { return _error; }
 	string &getErrorText() { return _text; }
 };
-
+#pragma endregion
 template <class T>
 struct L1Item
 {

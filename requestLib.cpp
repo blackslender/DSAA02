@@ -11,16 +11,20 @@
 
 #include "requestLib.h"
 
-
-void loadRequests(char* fName, L1List<VM_Request> &rList) {
+void loadRequests(char *fName, L1List<VM_Request> &rList)
+{
 	ifstream inputStream(fName);
-	if (inputStream) {
-		while (!inputStream.eof()) {
+	if (inputStream)
+	{
+		while (!inputStream.eof())
+		{
 			bool isEof = false;
 			string tmp;
 			inputStream >> tmp;
-			if (tmp == "") break;
-			while (tmp.length() > 0 && tmp.back() == ';') {
+			if (tmp == "")
+				break;
+			while (tmp.length() > 0 && tmp.back() == ';')
+			{
 				isEof = true;
 				tmp.pop_back();
 			}
@@ -28,7 +32,7 @@ void loadRequests(char* fName, L1List<VM_Request> &rList) {
 			rList.insertHead(*tmpR);
 		}
 	}
-	else cout << "The file is not found!";
+	else
+		cout << "The file is not found!";
 	rList.reverse();
-   
 }
