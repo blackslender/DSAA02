@@ -598,5 +598,29 @@ class AVLTree
 		op(node->data, param);
 	};
 };
+/************************************************************************
+* This section is for Heap
+************************************************************************/
+template <class T>
+class Heap
+{
+	vector<T> data;
 
+	bool (*comp)(T &, T &);
+
+	int FatherNode(int x)
+	{
+		return ((x + 1) / 2 - 1);
+	}
+	int LeftNode(int x)
+	{
+		return 2 * x + 1;
+	}
+	int RightNode(int x)
+	{
+		return 2 * x + 2;
+	}
+
+  public:
+};
 #endif //A02_DSALIB_H
