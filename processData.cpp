@@ -22,15 +22,41 @@ void PrintTime(time_t &time)
 	strPrintTime(c, time);
 	cout << c;
 }
+
+int timestampToHour(time_t &ts)
+{
+	return localtime(&ts)->tm_hour;
+}
+
+int timestampToMinute(time_t &ts)
+{
+	return localtime(&ts)->tm_min;
+}
+
+int timestampToSecond(time_t &ts)
+{
+	return localtime(&ts)->tm_sec;
+}
+
+void setTime(time_t &timestamp, int hh, int mm, int ss)
+{
+	tm ttm = *localtime(&timestamp);
+	ttm.tm_hour = hh;
+	ttm.tm_min = mm;
+	ttm.tm_sec = ss;
+	timestamp = mktime(&ttm);
+}
 extern L1List<VM_Record> *dbList;
 DbTree *dbTree;
 DbTree *removed = new DbTree();
+DbTree *tmpTree = new DbTree();
+DbTree *tmpTree2 = new DbTree();
 
 char h;
 bool ok;
 double longitude, latitude, radius;
 int res;
-int h1, h2;
+int h1, h2, M, hh, mm, n;
 VM_Record tmpr1, tmpr2, tmpr;
 VM_Record *tmppr;
 char id[MAX_PARAM_SIZE];
@@ -385,6 +411,124 @@ bool processRequest(VM_Request &request, L1List<VM_Record> &recordList, void *pG
 			cout << res << endl;
 			return true;
 			break;
+		}
+
+			//Overload forecast
+		case '6':
+		{
+			// 6_Along_Alat_M_hhmm
+
+			//Exact the request
+			if (!getline(ss, temp, '_'))
+				return false; //Request type
+
+			if (!getline(ss, temp, '_'))
+				return false; //Longitude
+			longitude = stod(temp);
+
+			if (!getline(ss, temp, '_'))
+				return false; //Latitude
+			latitude = stod(temp);
+
+			if (!getline(ss, temp, '_'))
+				return false; //Radius
+			M = stoi(temp);
+
+			if (!getline(ss, temp, '_'))
+				return false; //hhmm
+			hh = stoi(temp);
+			mm = hh % 100;
+			hh = hh / 100;
+			if (hh > 24 || mm > 59)
+				return false;
+
+			//Finish checking, work the request
+			cout << "6:";
+
+			//Create a dummy record for comparing
+			tmpr.timestamp = dbTree->Template().data->Template().timestamp;
+			setTime(tmpr.timestamp, hh, mm, 0);
+			tmpr.latitude = latitude;
+			tmpr.longitude = longitude;
+			tmpTree->Clean();
+			//Count number of vehicle within 2km radius
+			dbTree->TraverseLNR([](Vehicle &v) {
+				ok = false;
+				v.TraverseLNR([](VM_Record &r) {
+					int diffTime = int(tmpr.timestamp) - int(r.timestamp);
+					auto distance = distanceRecord(r, tmpr);
+					if (distance <= 2.0 && diffTime > 0 && diffTime < 15 * 60)
+						ok = true;
+				});
+				if (ok)
+					tmpTree->Insert(v);
+			});
+
+			if (tmpTree->IsEmpty())
+			{ //No vehicle in 2km radius
+				cout << " -1 - -1\n";
+				return true;
+			}
+
+			if (tmpTree->Size() < M)
+			{ //Number of vehicle is smaller than M, all these vehicle in 2km radius is allowed
+				tmpTree->TraverseLNR([](Vehicle &v) {
+					cout << " " << v.ID;
+				});
+				cout << " - -1\n";
+				return true;
+			}
+
+			if (tmpTree->Size())
+			{ // Number of vehicle is larger than M
+				//Count number of vehicle in 300m radius
+				n = 0;
+				tmpTree->TraverseLNR([](Vehicle &v) {
+					ok = false;
+					v.TraverseLNR([](VM_Record &r) {
+						int diffTime = int(r.timestamp) - int(tmpr.timestamp);
+						auto distance = distanceRecord(r, tmpr);
+						if (distance <= 0.3 && diffTime > 0 && diffTime <= 15 * 60)
+							ok = true;
+					});
+					if (ok)
+						n++;
+				});
+				if (n > 0.75 * M)
+				{ // All vehicle are banned
+					cout << " -1 -";
+					tmpTree->TraverseLNR([](Vehicle &v) {
+						cout << " " << v.ID;
+					});
+					cout << endl;
+					return true;
+				}
+
+				if (n <= 0.75 * M)
+				{ //Vehicle within 500m radius is allowed
+					tmpTree->TraverseLNR([](Vehicle &v) {
+						ok = false;
+						v.TraverseLNR([](VM_Record &r) {
+							if (distanceRecord(r, tmpr) <= 0.5)
+								ok = true;
+						});
+						if (ok)
+							cout << " " << v.ID;
+					});
+					cout << " -";
+					tmpTree->TraverseLNR([](Vehicle &v) {
+						ok = false;
+						v.TraverseLNR([](VM_Record &r) {
+							if (distanceRecord(r, tmpr) <= 0.5)
+								ok = true;
+						});
+						if (!ok)
+							cout << " " << v.ID;
+					});
+					cout << endl;
+					return true;
+				}
+			}
 		}
 			//Print the list of vehicles which is inside the storm at the hhmm moment
 		case '8':

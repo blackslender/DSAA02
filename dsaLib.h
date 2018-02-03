@@ -177,12 +177,26 @@ class AVLTree
 		return pRoot == NULL;
 	}
 
+	bool Clean()
+	{
+		Destroy(pRoot);
+		pRoot = NULL;
+	}
+
+	int Size()
+	{
+		return pRoot->Weight;
+	}
 	//Return a pointer to the value at root node
 	T *Root()
 	{
 		return &(pRoot->data);
 	}
 
+	T Template()
+	{
+		return pRoot->data;
+	}
 	//Return the tree's weight
 	size_t Weight()
 	{
@@ -608,14 +622,17 @@ class Heap
 	vector<T> data;
 	//Comparison function
 	bool (*comp)(T &, T &);
-	void swap(T& obj1, T& obj2) {
+	void swap(T &obj1, T &obj2)
+	{
 		T obj = obj1;
 		obj1 = obj2;
 		obj2 = obj;
 	}
 
-	T& GetMax(T& obj1, T& obj2) {
-		if (obj1 > obj2) return obj1;
+	T &GetMax(T &obj1, T &obj2)
+	{
+		if (obj1 > obj2)
+			return obj1;
 		return obj2;
 	}
 	int FatherNode(int x)
@@ -631,63 +648,79 @@ class Heap
 		return 2 * x + 2;
 	}
 
-	void PushUp(int &index) {
-		if (index == 0) return;
-		if (comp(data[FatherNode(index)], data[index])) {
+	void PushUp(int &index)
+	{
+		if (index == 0)
+			return;
+		if (comp(data[FatherNode(index)], data[index]))
+		{
 			Swap(data[FatherNode(index)], data[index]);
 			PushUp(FatherNode(index));
 		}
 	}
 
-	void PushDown(int &index) {
-		if (LeftNode(index) >= Size()) return;
-		if (LeftNode(index) == Size() - 1) {
+	void PushDown(int &index)
+	{
+		if (LeftNode(index) >= Size())
+			return;
+		if (LeftNode(index) == Size() - 1)
+		{
 			if (Comp(data[LeftNode(index)], data[index]))
 				swap(data[LeftNode(index)], data[index]);
 			return;
 		}
 		int x = LeftNode(index);
-		if (Comp(data[RightNode(index)], data[LeftNode(index)])) x = RightNode(index);
-		if (Comp(data[x], data[index])) {
+		if (Comp(data[RightNode(index)], data[LeftNode(index)]))
+			x = RightNode(index);
+		if (Comp(data[x], data[index]))
+		{
 			Swap(data[x], data[index]);
 			PushDown(x);
 		}
 	}
+
   public:
 #pragma region Constructor
-	  Heap() { //Default heap is maxheap
-		  comp = [](T& obj1, T& obj2) -> bool{
-			  return obj1 > obj2;
-		  };
-	  }
+	Heap()
+	{ //Default heap is maxheap
+		comp = [](T &obj1, T &obj2) -> bool {
+			return obj1 > obj2;
+		};
+	}
 
-	  Heap(bool&(*op)(T&, T&)) {
-		  comp = op;
-	  }
+	Heap(bool &(*op)(T &, T &))
+	{
+		comp = op;
+	}
 
-	  Heap(const Heap<T> &obj) { //Copy constructor
-		  data = obj.data;
-	  }
+	Heap(const Heap<T> &obj)
+	{ //Copy constructor
+		data = obj.data;
+	}
 #pragma endregion
-	  size_t Size() {
-		  return data.size();
-	  }
+	size_t Size()
+	{
+		return data.size();
+	}
 
-	  void Insert(T& value) {
-		  data.push_back(value);
-		  PushUp(data.size() - 1);
-	  }
+	void Insert(T &value)
+	{
+		data.push_back(value);
+		PushUp(data.size() - 1);
+	}
 
-	  T Pop() {
-		  T tmp = data[0];
-		  data[0] = data.back();
-		  data.pop_back();
-		  PushDown(0);
-		  return tmp;
-	  }
+	T Pop()
+	{
+		T tmp = data[0];
+		data[0] = data.back();
+		data.pop_back();
+		PushDown(0);
+		return tmp;
+	}
 
-	  T Top() {
-		  return data[0];
-	  }
+	T Top()
+	{
+		return data[0];
+	}
 };
 #endif //A02_DSALIB_H
