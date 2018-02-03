@@ -608,7 +608,7 @@ class Heap
 	vector<T> data;
 	//Comparison function
 	bool (*comp)(T &, T &);
-	void Swap(T& obj1, T& obj2) {
+	void swap(T& obj1, T& obj2) {
 		T obj = obj1;
 		obj1 = obj2;
 		obj2 = obj;
@@ -631,15 +631,15 @@ class Heap
 		return 2 * x + 2;
 	}
 
-	void PushUp(int index) {
+	void PushUp(int &index) {
 		if (index == 0) return;
-		if (!comp(data[FatherNode(index)], data[index])) {
+		if (comp(data[FatherNode(index)], data[index])) {
 			Swap(data[FatherNode(index)], data[index]);
 			PushUp(FatherNode(index));
 		}
 	}
 
-	void PushDown(int index) {
+	void PushDown(int &index) {
 		if (LeftNode(index) >= Size()) return;
 		if (LeftNode(index) == Size() - 1) {
 			if (Comp(data[LeftNode(index)], data[index]))
