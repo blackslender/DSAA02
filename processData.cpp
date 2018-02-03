@@ -122,7 +122,8 @@ bool processRequest(VM_Request &request, L1List<VM_Record> &recordList, void *pG
 
 			//Finish checking, work the request
 
-			cout << request.code << ": ";
+			//cout << request.code << ": ";
+			cout << "1: ";
 			Vehicle *v1 = dbTree->Find(idX);
 			Vehicle *v2 = dbTree->Find(idY);
 
@@ -140,17 +141,18 @@ bool processRequest(VM_Request &request, L1List<VM_Record> &recordList, void *pG
 				cout << "-1\n";
 				return true;
 			}
-
-			//Vertical position
-			if (r1->latitude - r2->latitude >= 0)
-				cout << "S ";
-			else
-				cout << "N ";
 			//Horizontal position
 			if (r1->longitude - r2->longitude >= 0)
 				cout << "E ";
 			else
 				cout << "W ";
+			//Vertical position
+			if (r1->latitude - r2->latitude >= 0)
+				cout << "N ";
+			else
+
+				cout << "S ";
+
 			//Distance
 			cout << distanceRecord(*r1, *r2) << endl;
 
@@ -182,7 +184,8 @@ bool processRequest(VM_Request &request, L1List<VM_Record> &recordList, void *pG
 				return false;
 
 			//Finish checking, work the request
-			cout << request.code << ": ";
+			//cout << request.code << ": ";
+			cout << "2: ";
 			res = 0;
 
 			dbTree->TraverseLNR([](Vehicle &v) {
@@ -229,7 +232,8 @@ bool processRequest(VM_Request &request, L1List<VM_Record> &recordList, void *pG
 				return false;
 
 			//Finish checking, work the request
-			cout << request.code << ": ";
+			//cout << request.code << ": ";
+			cout << "3: ";
 			res = 0;
 
 			dbTree->TraverseLNR([](Vehicle &v) {
@@ -284,7 +288,8 @@ bool processRequest(VM_Request &request, L1List<VM_Record> &recordList, void *pG
 			if (getline(ss, temp))
 				return false;
 			//Finish checking, work the request
-			cout << request.code << ": ";
+			//cout << request.code << ": ";
+			cout << "4: ";
 			if (dbTree->IsEmpty())
 			{
 				cout << "-1\n";
@@ -314,7 +319,7 @@ bool processRequest(VM_Request &request, L1List<VM_Record> &recordList, void *pG
 			dbTree->TraverseLNR([](Vehicle &v) {
 				ok = false;
 				v.TraverseLNR([](VM_Record &r) {
-					if (r.timestamp >= tmpr1.timestamp && r.timestamp <= tmpr2.timestamp && distanceRecord(tmpr, r) < radius)
+					if (r.timestamp >= tmpr1.timestamp && r.timestamp <= tmpr2.timestamp && distanceRecord(tmpr, r) <= radius)
 						ok = true;
 				});
 				if (ok)
@@ -351,8 +356,14 @@ bool processRequest(VM_Request &request, L1List<VM_Record> &recordList, void *pG
 				return false;
 
 			//Finish checking, work the request
-			cout << request.code << ": ";
+			//cout << request.code << ": ";
+			cout << "5: ";
 			Vehicle *v = dbTree->Find(id);
+			if (v == NULL)
+			{
+				cout << "-1\n";
+				return true;
+			}
 			res = 0;
 			tmppr = NULL;
 			v->TraverseLNR([](VM_Record &r) {
@@ -412,7 +423,8 @@ bool processRequest(VM_Request &request, L1List<VM_Record> &recordList, void *pG
 				return false;
 
 			//Finish checking, work the request
-			cout << request.code << ":";
+			//cout << request.code << ":";
+			cout << "8:";
 			dbTree->TraverseLNR([](Vehicle &v) {
 				ok = true;
 				v.TraverseLNR([](VM_Record &r) {
@@ -473,7 +485,8 @@ bool processRequest(VM_Request &request, L1List<VM_Record> &recordList, void *pG
 				return false;
 
 			//Finish checking, work the request
-			cout << request.code << ":";
+			//cout << request.code << ":";
+			cout << "9:";
 			removed->TraverseLNR([](Vehicle &v) {
 				ok = true;
 				v.TraverseLNR([](VM_Record &r) {
