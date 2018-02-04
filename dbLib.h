@@ -27,6 +27,7 @@
 #endif
 
 #define ID_MAX_LENGTH 16
+#define MAX_DIS 900000000.0
 
 struct VM_Record
 {
@@ -106,9 +107,10 @@ struct Timehms
 	}
 };
 
-class Vehicle
+struct Vehicle
 {
   public:
+	double dis = MAX_DIS;
 	char ID[10];
 	AVLTree<VM_Record> *data;
 
@@ -122,10 +124,11 @@ class Vehicle
 		strcpy(ID, id);
 		data = new AVLTree<VM_Record>();
 	}
-	Vehicle(Vehicle &obj)
+	Vehicle(const Vehicle &obj)
 	{
 		strcpy(ID, obj.ID);
 		data = obj.data;
+		dis = obj.dis;
 	}
 	//The avltree wont be delete
 	~Vehicle()
@@ -144,6 +147,7 @@ class Vehicle
 	{
 		strcpy(ID, obj.ID);
 		data = obj.data;
+		dis = obj.dis;
 	}
 
 	bool operator<(char *obj) { return strcmp(ID, obj) < 0; }

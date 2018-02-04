@@ -195,6 +195,8 @@ class AVLTree
 
 	T Template()
 	{
+		if (IsEmpty())
+			throw("The AVLTree is empty");
 		return pRoot->data;
 	}
 	//Return the tree's weight
@@ -224,6 +226,40 @@ class AVLTree
 	void TraverseLNR(void (*op)(T &, void *), void *param) { TraverseLNR(op, param, pRoot); }
 	//Traverse the tree LRN
 	void TraverseLRN(void (*op)(T &, void *), void *param) { TraverseLRN(op, param, pRoot); }
+
+	//Return the max - rightmost element
+	T &Max()
+	{
+		if (IsEmpty())
+			throw("The AVLTree is empty");
+		AVLNode<T> *p = pRoot;
+		while (p->RChild)
+			p = p->RChild;
+		return p->data;
+	}
+
+	//Return the min - leftmost element
+	T &Min()
+	{
+		if (IsEmpty())
+			throw("The AVLTree is empty");
+		AVLNode<T> *p = pRoot;
+		while (p->RChild)
+			p = p->RChild;
+		return p->data;
+	}
+
+	//Pop out the maximum value
+	void PopMax()
+	{
+		Remove(Max());
+	}
+
+	//Pop out the minimun value
+	void PopMin()
+	{
+		Remove(Min());
+	}
 
   protected:
 	//Return the rightmost node of the tree at root
@@ -621,8 +657,8 @@ class Heap
 
 	vector<T> data;
 	//Comparison function
-	bool (*comp)(T &, T &);
-	void swap(T &obj1, T &obj2)
+	bool (*Comp)(T &, T &);
+	void Swap(T &obj1, T &obj2)
 	{
 		T obj = obj1;
 		obj1 = obj2;
@@ -683,14 +719,14 @@ class Heap
 #pragma region Constructor
 	Heap()
 	{ //Default heap is maxheap
-		comp = [](T &obj1, T &obj2) -> bool {
+		Comp = [](T &obj1, T &obj2) -> bool {
 			return obj1 > obj2;
 		};
 	}
 
 	Heap(bool &(*op)(T &, T &))
 	{
-		comp = op;
+		Comp = op;
 	}
 
 	Heap(const Heap<T> &obj)

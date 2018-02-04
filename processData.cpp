@@ -51,10 +51,11 @@ DbTree *dbTree;
 DbTree *removed = new DbTree();
 DbTree *tmpTree = new DbTree();
 DbTree *tmpTree2 = new DbTree();
+Heap<Vehicle> *heap;
 
 char h;
 bool ok;
-double longitude, latitude, radius;
+double longitude, latitude, radius, dis;
 int res;
 int h1, h2, M, hh, mm, n;
 VM_Record tmpr1, tmpr2, tmpr;
@@ -530,7 +531,113 @@ bool processRequest(VM_Request &request, L1List<VM_Record> &recordList, void *pG
 				}
 			}
 		}
-			//Print the list of vehicles which is inside the storm at the hhmm moment
+			//Stucking forecast
+		case '7':
+		{
+			// 7_Along_Alat_M_R_hhmm
+
+			//Exact the request
+			if (!getline(ss, temp, '_'))
+				return false; //Request type
+
+			if (!getline(ss, temp, '_'))
+				return false; //Longitude
+			longitude = stod(temp);
+
+			if (!getline(ss, temp, '_'))
+				return false; //Latitude
+			latitude = stod(temp);
+
+			if (!getline(ss, temp, '_'))
+				return false; //M
+			M = stoi(temp);
+
+			if (!getline(ss, temp, '_'))
+				return false; //Radius
+			radius = stod(temp);
+
+			if (!getline(ss, temp, '_'))
+				return false; //hhmm
+			hh = stoi(temp);
+			mm = hh % 100;
+			hh = hh / 100;
+			if (hh > 24 || mm > 59)
+				return false;
+
+			//Finish checking, work the request
+			cout << "7:";
+
+			//Create a dummy record for comparing
+			tmpr.timestamp = dbTree->Template().data->Template().timestamp;
+			setTime(tmpr.timestamp, hh, mm, 0);
+			tmpr.latitude = latitude;
+			tmpr.longitude = longitude;
+			tmpTree->Clean();
+
+			//Count the numbers of vehicle within 500m radius after hhmm 30mins
+			dbTree->TraverseLNR([](Vehicle &v) {
+				ok = false;
+				dis = MAX_DIS + 0.1;
+				v.TraverseLNR([](VM_Record &r) {
+					int diffTime = int(r.timestamp) - int(tmpr.timestamp);
+					double distn = distanceRecord(r, tmpr);
+					if (diffTime > 0 && diffTime < 30 * 60 && distanceRecord(r, tmpr) < 0.5)
+					{
+						if (dis > distn)
+							dis = distn;
+						ok = true;
+					}
+				});
+				v.dis = dis;
+				if (ok)
+					tmpTree->Insert(v);
+			});
+
+			//Now we have tmpTree cointains these vehicles within 500m radius
+
+			if (tmpTree->Size() < 0.7 * M)
+			{ // No vehicles are stuck
+				cout << " -1 -";
+				tmpTree->TraverseLNR([](Vehicle &v) {
+					cout << " " << v.id;
+				});
+				cout << endl;
+				return true;
+			}
+
+			if (tmpTree->Size() >= 0.7 * M)
+			{ //Stucking happened, 75% vehicle in 1~2km is not
+				//Count number of vehicle in 1~2km radius
+				n = 0;
+
+				tmpTree->TraverseLNR([](Vehicle &v) {
+					if (v.dis >= 1 && v.dis <= 2)
+						n++;
+				});
+				n = int(0.75 * n);
+				heap = new Heap([](Vehicle &v1, Vehicle &v2) -> bool { return v1 > v2; });
+				tmpTree->TraverseLNR([](Vehicle &v) { heap->Insert(v); });
+				while (n--)
+					heap->Pop();
+
+				tmpTree2.Clean();
+				while (heap->IsEmpty())
+				{
+					Vehicle tmpv = heap->Pop();
+					tmpTree2->Insert(tmpv);
+					tmpTree->Remove(tmpv);
+				}
+				tmpTree->TraverseLNR([](Vehicle &v) {
+					cout << " " << v.id;
+				});
+				cout << " -";
+				tmpTree2->TraverseLNR([](Vehicle &v) {
+					cout << " " << v.id;
+				});
+				cout << endl;
+				return true;
+			}
+		//Print the list of vehicles which is inside the storm at the hhmm moment
 		case '8':
 		{ //8_longitude_latitude_radius_hhmm
 
@@ -660,10 +767,10 @@ bool processRequest(VM_Request &request, L1List<VM_Record> &recordList, void *pG
 			break;
 		}
 		}
-		return true;
+			return true;
+		}
+		catch (char *)
+		{
+			return false;
+		}
 	}
-	catch (char *)
-	{
-		return false;
-	}
-}
