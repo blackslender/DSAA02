@@ -28,7 +28,7 @@ int main(int narg, char **argv)
     timer = clock();
     process(requestList, db);
 
-    cout << "Load data: " << setprecision(6) << double(clock() - timer) / CLOCKS_PER_SEC << "s" << endl;
+    cout << "Process requests: " << setprecision(6) << double(clock() - timer) / CLOCKS_PER_SEC << "s" << endl;
     cout << resetiosflags(ios::showbase) << setprecision(-1);
     return 0;
 }

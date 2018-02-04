@@ -65,8 +65,6 @@ Timehms rTime;
 
 bool initVMGlobalData(void **pGData)
 {
-	// TODO: allocate and initialize global data
-	// return false if failed
 	dbTree = new DbTree;
 	VM_Record *obj = &dbList->Head()->data;
 
@@ -187,7 +185,7 @@ bool processRequest(VM_Request &request, L1List<VM_Record> &recordList, void *pG
 			return true;
 			break;
 		}
-			//Count the number of vehicles which only travel to the East/West of a longitude
+		//Count the number of vehicles which only travel to the East/West of a longitude
 		case '2':
 		{ //Case 2: 2_longitude_H
 
@@ -235,7 +233,7 @@ bool processRequest(VM_Request &request, L1List<VM_Record> &recordList, void *pG
 			return true;
 			break;
 		}
-			//Count the number of vehicles which only travel to the North/South of a latitude
+		//Count the number of vehicles which only travel to the North/South of a latitude
 		case '3':
 		{ //Case 3: 3_latitude_H
 
@@ -283,7 +281,7 @@ bool processRequest(VM_Request &request, L1List<VM_Record> &recordList, void *pG
 			return true;
 			break;
 		}
-			//Count the number of vehicles which is in a area around a observe point in a range of time
+		//Count the number of vehicles which is in a area around a observe point in a range of time
 		case '4':
 		{ //4_longitude_latitude_Radius_HourFrom_HourTo
 
@@ -356,7 +354,7 @@ bool processRequest(VM_Request &request, L1List<VM_Record> &recordList, void *pG
 			return true;
 			break;
 		}
-			//Count the number of times the vehicle step in an area
+		//Count the number of times the vehicle step in an area
 		case '5':
 		{ //5_ID_longitude_latitude_radius
 
@@ -414,7 +412,7 @@ bool processRequest(VM_Request &request, L1List<VM_Record> &recordList, void *pG
 			break;
 		}
 
-			//Overload forecast
+		//Overload forecast
 		case '6':
 		{
 			// 6_Along_Alat_M_hhmm
@@ -531,7 +529,7 @@ bool processRequest(VM_Request &request, L1List<VM_Record> &recordList, void *pG
 				}
 			}
 		}
-			//Stucking forecast
+		//Stucking forecast
 		case '7':
 		{
 			// 7_Along_Alat_M_R_hhmm
@@ -599,7 +597,7 @@ bool processRequest(VM_Request &request, L1List<VM_Record> &recordList, void *pG
 			{ // No vehicles are stuck
 				cout << " -1 -";
 				tmpTree->TraverseLNR([](Vehicle &v) {
-					cout << " " << v.id;
+					cout << " " << v.ID;
 				});
 				cout << endl;
 				return true;
@@ -615,12 +613,12 @@ bool processRequest(VM_Request &request, L1List<VM_Record> &recordList, void *pG
 						n++;
 				});
 				n = int(0.75 * n);
-				heap = new Heap([](Vehicle &v1, Vehicle &v2) -> bool { return v1 > v2; });
+				heap = new Heap<Vehicle>([](Vehicle &v1, Vehicle &v2) -> bool { return v1.dis > v2.dis; });
 				tmpTree->TraverseLNR([](Vehicle &v) { heap->Insert(v); });
 				while (n--)
 					heap->Pop();
 
-				tmpTree2.Clean();
+				tmpTree2->Clean();
 				while (heap->IsEmpty())
 				{
 					Vehicle tmpv = heap->Pop();
@@ -628,16 +626,16 @@ bool processRequest(VM_Request &request, L1List<VM_Record> &recordList, void *pG
 					tmpTree->Remove(tmpv);
 				}
 				tmpTree->TraverseLNR([](Vehicle &v) {
-					cout << " " << v.id;
+					cout << " " << v.ID;
 				});
 				cout << " -";
 				tmpTree2->TraverseLNR([](Vehicle &v) {
-					cout << " " << v.id;
+					cout << " " << v.ID;
 				});
 				cout << endl;
 				return true;
 			}
-		//Print the list of vehicles which is inside the storm at the hhmm moment
+			//Print the list of vehicles which is inside the storm at the hhmm moment
 		case '8':
 		{ //8_longitude_latitude_radius_hhmm
 
@@ -699,7 +697,7 @@ bool processRequest(VM_Request &request, L1List<VM_Record> &recordList, void *pG
 			return true;
 			break;
 		}
-			//Reset the database of vehicles which has been delete to the database
+		//Reset the database of vehicles which has been delete to the database
 		case '9':
 		{
 
@@ -767,10 +765,12 @@ bool processRequest(VM_Request &request, L1List<VM_Record> &recordList, void *pG
 			break;
 		}
 		}
-			return true;
+		return true;
 		}
-		catch (char *)
+	}
+	catch (char *)
 		{
 			return false;
 		}
-	}
+}
+

@@ -177,7 +177,7 @@ class AVLTree
 		return pRoot == NULL;
 	}
 
-	bool Clean()
+	void Clean()
 	{
 		Destroy(pRoot);
 		pRoot = NULL;
@@ -684,20 +684,20 @@ class Heap
 		return 2 * x + 2;
 	}
 
-	void PushUp(int &index)
+	void PushUp(int index)
 	{
 		if (index == 0)
 			return;
-		if (comp(data[FatherNode(index)], data[index]))
+		if (Comp(data[FatherNode(index)], data[index]))
 		{
 			Swap(data[FatherNode(index)], data[index]);
 			PushUp(FatherNode(index));
 		}
 	}
 
-	void PushDown(int &index)
+	void PushDown(int index)
 	{
-		if (LeftNode(index) >= Size())
+		if (LeftNode(index) >= int(Size()))
 			return;
 		if (LeftNode(index) == Size() - 1)
 		{
@@ -724,7 +724,7 @@ class Heap
 		};
 	}
 
-	Heap(bool &(*op)(T &, T &))
+	Heap(bool (*op)(T &, T &))
 	{
 		Comp = op;
 	}
@@ -734,6 +734,9 @@ class Heap
 		data = obj.data;
 	}
 #pragma endregion
+	bool IsEmpty() {
+		return data.size() == 0;
+	}
 	size_t Size()
 	{
 		return data.size();

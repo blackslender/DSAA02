@@ -130,10 +130,19 @@ struct Vehicle
 		data = obj.data;
 		dis = obj.dis;
 	}
+
 	//The avltree wont be delete
 	~Vehicle()
 	{
 		//delete data;
+	}
+
+	//In assign operator, only the address of the tree is assign
+	void operator=(const Vehicle &obj)
+	{
+		strcpy(ID, obj.ID);
+		data = obj.data;
+		dis = obj.dis;
 	}
 
 	bool operator<(Vehicle &obj) { return strcmp(ID, obj.ID) < 0; }
@@ -142,13 +151,7 @@ struct Vehicle
 	bool operator>=(Vehicle &obj) { return strcmp(ID, obj.ID) >= 0; }
 	bool operator==(Vehicle &obj) { return strcmp(ID, obj.ID) == 0; }
 
-	//In assign operator, only the address of the tree is assign
-	void operator=(Vehicle &obj)
-	{
-		strcpy(ID, obj.ID);
-		data = obj.data;
-		dis = obj.dis;
-	}
+	
 
 	bool operator<(char *obj) { return strcmp(ID, obj) < 0; }
 	bool operator<=(char *obj) { return strcmp(ID, obj) <= 0; }
