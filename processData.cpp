@@ -572,69 +572,81 @@ bool processRequest(VM_Request &request, L1List<VM_Record> &recordList, void *pG
 			tmpr.longitude = longitude;
 			tmpTree->Clean();
 
-			//Count the numbers of vehicle within 500m radius after hhmm 30mins
+			//Calculate the distance to observer
 			dbTree->TraverseLNR([](Vehicle &v) {
 				ok = false;
 				dis = MAX_DIS + 0.1;
 				v.TraverseLNR([](VM_Record &r) {
 					int diffTime = int(r.timestamp) - int(tmpr.timestamp);
-					double distn = distanceRecord(r, tmpr);
-					if (diffTime > 0 && diffTime < 30 * 60 && distanceRecord(r, tmpr) < 0.5)
+					if (diffTime > 0 && diffTime < 30 * 60)
 					{
-						if (dis > distn)
-							dis = distn;
-						ok = true;
+						double ds = distanceRecord(r, tmpr);
+						if (dis > ds)
+							dis = ds;
+						if (ds < 0.5)
+							ok = true;
 					}
 				});
 				v.dis = dis;
 				if (ok)
-					tmpTree->Insert(v);
+					n++;
 			});
 
-			//Now we have tmpTree cointains these vehicles within 500m radius
-
-			if (tmpTree->Size() < 0.7 * M)
-			{ // No vehicles are stuck
+			if (n < 0.7 * M)
+			{ // No stuck
 				cout << " -1 -";
-				tmpTree->TraverseLNR([](Vehicle &v) {
-					cout << " " << v.ID;
+				dbTree->TraverseLNR([](Vehicle &v) {
+					if (v.dis <= 2)
+						cout << " " << v.ID;
 				});
 				cout << endl;
 				return true;
 			}
 
-			if (tmpTree->Size() >= 0.7 * M)
-			{ //Stucking happened, 75% vehicle in 1~2km is not
-				//Count number of vehicle in 1~2km radius
-				n = 0;
-
-				tmpTree->TraverseLNR([](Vehicle &v) {
-					if (v.dis >= 1 && v.dis <= 2)
-						n++;
-				});
-				n = int(0.75 * n);
+			if (n >= 0.7 * M)
+			{ //75% in 1~2km zone is not stuck
+				if (heap != NULL)
+					delete heap;
 				heap = new Heap<Vehicle>([](Vehicle &v1, Vehicle &v2) -> bool { return v1.dis > v2.dis; });
-				tmpTree->TraverseLNR([](Vehicle &v) { heap->Insert(v); });
-				while (n--)
-					heap->Pop();
-
+				tmpTree->Clean();
+				//Put vehicles within 1~2km in heap, <1km in tmpTree
+				dbTree->TraverseLNR([](Vehicle &v) {
+					if (v.dis < 1)
+						tmpTree->Insert(v);
+					if (v.dis >= 1 && v.dis <= 2)
+						heap->Insert(v);
+				});
+				//Now pop out 75% elements in heap to tmpTree2 as non-stuck vehicle
 				tmpTree2->Clean();
-				while (heap->IsEmpty())
+				n = int(0.75 * heap->Size());
+				while (n--)
 				{
-					Vehicle tmpv = heap->Pop();
-					tmpTree2->Insert(tmpv);
-					tmpTree->Remove(tmpv);
+					Vehicle tmp = heap->Pop();
+					tmpTree2->Insert(tmp);
 				}
+				//Put the rest of heap into tmpTree
+				while (!heap->IsEmpty())
+				{
+					Vehicle tmp = heap->Pop();
+					tmpTree->Insert(tmp);
+				}
+
+				//Print result
+				if (tmpTree->IsEmpty())
+					cout << " -1";
 				tmpTree->TraverseLNR([](Vehicle &v) {
 					cout << " " << v.ID;
 				});
 				cout << " -";
+				if (tmpTree->IsEmpty())
+					cout << " -1";
 				tmpTree2->TraverseLNR([](Vehicle &v) {
 					cout << " " << v.ID;
 				});
 				cout << endl;
 				return true;
 			}
+
 			//Print the list of vehicles which is inside the storm at the hhmm moment
 		case '8':
 		{ //8_longitude_latitude_radius_hhmm
@@ -765,12 +777,11 @@ bool processRequest(VM_Request &request, L1List<VM_Record> &recordList, void *pG
 			break;
 		}
 		}
-		return true;
+			return true;
 		}
 	}
 	catch (char *)
-		{
-			return false;
-		}
+	{
+		return false;
+	}
 }
-
